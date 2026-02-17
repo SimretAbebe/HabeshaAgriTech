@@ -20,3 +20,18 @@ class RegisterView(generics.CreateAPIView):
             "refresh": str(refresh),
             "access": str(refresh.access_token),
         }, status=status.HTTP_201_CREATED)
+
+from django.contrib.auth import get_user_model
+from .permissions import IsAdmin
+
+User = get_user_model()
+
+class VerifyExpertView(generics.UpdateAPIView):
+    queryset = User.objects.filter(role='expert')
+    permission_classes = [IsAdmin]
+
+    def update(self, request, *args, **kwargs):
+        user_to_verify = self.get_object()
+        user_to_verify.is_verified = True
+        user_to_verify.save()
+        return Response({"message": f"Expert {user_to_verify.username} verified successfully."})
